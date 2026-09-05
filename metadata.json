@@ -1,0 +1,7 @@
+{
+  "name": "Mausam",
+  "description": "Multi-persona Indian weather intelligence dashboard tailored for health, fitness, travel, beach, family, gardening, commuting, and event planning.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
