@@ -40,6 +40,8 @@ import { FestivalTravelOverlay } from './components/FestivalTravelOverlay';
 import { ShareWeatherModal } from './components/ShareWeatherModal';
 import { NotificationOptIn } from './components/NotificationOptIn';
 import { OnboardingTour } from './components/OnboardingTour';
+import { PurposeGateway } from './components/PurposeGateway';
+import { ActivePersonaBanner } from './components/ActivePersonaBanner';
 import { getTranslation } from './utils/translations';
 
 // Persona panel components
@@ -127,6 +129,16 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   // 8. Modals state
+  const [showPurposeGateway, setShowPurposeGateway] = useState<boolean>(true);
+
+  const handleSelectPurpose = (persona: PersonaId) => {
+    setActiveMode(persona);
+    try {
+      localStorage.setItem('skycast_last_mode', persona);
+    } catch {}
+    setShowPurposeGateway(false);
+  };
+
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [isCycloneOpen, setIsCycloneOpen] = useState(false);
@@ -222,26 +234,42 @@ export default function App() {
       {/* 4-Step First Visit Onboarding Tour */}
       <OnboardingTour language={language} />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Global Shared Top Navigation & Header */}
-        <WeatherHeader
-          currentLocation={currentLocation}
-          onSelectLocation={(loc) => setCurrentLocation(loc)}
-          tempUnit={tempUnit}
-          speedUnit={speedUnit}
-          onToggleTempUnit={handleToggleTempUnit}
-          onToggleSpeedUnit={handleToggleSpeedUnit}
-          isDarkMode={isDarkMode}
-          onToggleTheme={handleToggleTheme}
+      {showPurposeGateway ? (
+        <PurposeGateway
+          onSelectPurpose={handleSelectPurpose}
           language={language}
-          onSelectLanguage={handleSelectLanguage}
-          onOpenCompare={() => setIsCompareOpen(true)}
-          onOpenMap={() => setIsMapOpen(true)}
-          onOpenShare={() => setIsShareOpen(true)}
-          onOpenNotifications={() => setIsNotificationsOpen(true)}
-          onOpenFestivals={() => setIsFestivalsOpen(true)}
-          onOpenCyclone={() => setIsCycloneOpen(true)}
+          isDarkMode={isDarkMode}
         />
+      ) : (
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          {/* Who You Are Today Active Persona Banner - Absolute top element on the dashboard */}
+          <ActivePersonaBanner
+            activeMode={activeMode}
+            onOpenPurposeGateway={() => setShowPurposeGateway(true)}
+            language={language}
+            isDarkMode={isDarkMode}
+          />
+
+          {/* Global Shared Top Navigation & Header */}
+          <WeatherHeader
+            currentLocation={currentLocation}
+            onSelectLocation={(loc) => setCurrentLocation(loc)}
+            tempUnit={tempUnit}
+            speedUnit={speedUnit}
+            onToggleTempUnit={handleToggleTempUnit}
+            onToggleSpeedUnit={handleToggleSpeedUnit}
+            isDarkMode={isDarkMode}
+            onToggleTheme={handleToggleTheme}
+            language={language}
+            onSelectLanguage={handleSelectLanguage}
+            onOpenCompare={() => setIsCompareOpen(true)}
+            onOpenMap={() => setIsMapOpen(true)}
+            onOpenShare={() => setIsShareOpen(true)}
+            onOpenNotifications={() => setIsNotificationsOpen(true)}
+            onOpenFestivals={() => setIsFestivalsOpen(true)}
+            onOpenCyclone={() => setIsCycloneOpen(true)}
+            onOpenPurposeGateway={() => setShowPurposeGateway(true)}
+          />
 
         {/* Data You Can Trust Strip */}
         <TrustStrip language={language} isDarkMode={isDarkMode} />
@@ -290,43 +318,7 @@ export default function App() {
         {/* Active Weather Dashboard */}
         {weatherData && (
           <div className="space-y-6">
-            {/* Generalized Seasonal Advisory Banner (Monsoon / Heatwave / Winter Fog / Cyclone) */}
-            <SeasonalAdvisoryBanner weather={weatherData} language={language} isDarkMode={isDarkMode} />
-
-            {/* IMD Severe Weather Warning Alerts Banner */}
-            {weatherData.alerts && weatherData.alerts.length > 0 && (
-              <WeatherAlertsBanner alerts={weatherData.alerts} language={language} />
-            )}
-
-            {/* 1. Global Shared Section (Current Conditions + 7-Day Forecast Strip) */}
-            <section id="global-weather-section" className="space-y-6">
-              <CurrentConditionsCard
-                weather={weatherData}
-                tempUnit={tempUnit}
-                speedUnit={speedUnit}
-                language={language}
-              />
-
-              <ForecastStrip
-                daily={weatherData.daily}
-                hourly={weatherData.hourly}
-                tempUnit={tempUnit}
-                speedUnit={speedUnit}
-                timezoneOffset={weatherData.timezone_offset}
-                language={language}
-              />
-            </section>
-
-            {/* 2. Persona Mode Switcher ("Who are you today?") */}
-            <section id="persona-selector-section" className="pt-2">
-              <ModeSwitcher
-                activeMode={activeMode}
-                onSelectMode={handleSelectMode}
-                language={language}
-              />
-            </section>
-
-            {/* 3. Persona Dynamic Content Panel (Changes Based on Selected Mode) */}
+            {/* 1. Persona Dynamic Content Panel & Switcher (Directly at the top for the chosen persona) */}
             <section id="persona-content-section" className="pt-2 min-h-[360px]">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -405,6 +397,42 @@ export default function App() {
                 </motion.div>
               </AnimatePresence>
             </section>
+
+            {/* Persona Mode Switcher ("Who are you today?") */}
+            <section id="persona-selector-section" className="pt-2">
+              <ModeSwitcher
+                activeMode={activeMode}
+                onSelectMode={handleSelectMode}
+                language={language}
+              />
+            </section>
+
+            {/* Generalized Seasonal Advisory Banner (Monsoon / Heatwave / Winter Fog / Cyclone) */}
+            <SeasonalAdvisoryBanner weather={weatherData} language={language} isDarkMode={isDarkMode} />
+
+            {/* IMD Severe Weather Warning Alerts Banner */}
+            {weatherData.alerts && weatherData.alerts.length > 0 && (
+              <WeatherAlertsBanner alerts={weatherData.alerts} language={language} />
+            )}
+
+            {/* Global Shared Section (Current Conditions + 7-Day Forecast Strip) */}
+            <section id="global-weather-section" className="space-y-6">
+              <CurrentConditionsCard
+                weather={weatherData}
+                tempUnit={tempUnit}
+                speedUnit={speedUnit}
+                language={language}
+              />
+
+              <ForecastStrip
+                daily={weatherData.daily}
+                hourly={weatherData.hourly}
+                tempUnit={tempUnit}
+                speedUnit={speedUnit}
+                timezoneOffset={weatherData.timezone_offset}
+                language={language}
+              />
+            </section>
           </div>
         )}
 
@@ -446,6 +474,7 @@ export default function App() {
           </div>
         </footer>
       </div>
+      )}
 
       {/* Modals & Dialogs */}
       <CityComparisonModal

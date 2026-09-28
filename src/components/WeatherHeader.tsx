@@ -46,6 +46,7 @@ interface WeatherHeaderProps {
   onOpenNotifications: () => void;
   onOpenFestivals: () => void;
   onOpenCyclone?: () => void;
+  onOpenPurposeGateway?: () => void;
 }
 
 const RECENT_SEARCHES_KEY = 'skycast_recent_searches_in';
@@ -67,6 +68,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   onOpenNotifications,
   onOpenFestivals,
   onOpenCyclone,
+  onOpenPurposeGateway,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<LocationData[]>([]);
@@ -658,6 +660,22 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
                 </div>
 
                 <div className="py-1.5 space-y-1">
+                  {/* Choose Purpose / Switch Persona */}
+                  {onOpenPurposeGateway && (
+                    <button
+                      onClick={() => {
+                        setShowMoreToolsMenu(false);
+                        onOpenPurposeGateway();
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs rounded-xl hover:bg-slate-900 flex items-center space-x-2.5 text-emerald-300 hover:text-emerald-200 transition font-bold"
+                    >
+                      <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">
+                        <Compass className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">Choose Purpose & Personas</div>
+                    </button>
+                  )}
+
                   {/* Weather Map */}
                   <button
                     onClick={() => {
